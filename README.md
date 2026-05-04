@@ -182,5 +182,3 @@ The tool generates findings in the following format:
 This project is for educational and compliance assessment purposes only.
 
 ---
-
-*Built with ❤️ for cloud security*
