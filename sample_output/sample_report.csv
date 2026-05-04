@@ -1,0 +1,20 @@
+Resource ID,Risk Area,Finding,Severity,Status,Recommendation,Timestamp
+Root Account,IAM - Root MFA,Root account does NOT have MFA enabled,CRITICAL,FAIL,Enable MFA on root account immediately. Use a hardware MFA device if possible.,2026-05-04 18:14:58 UTC
+IAM User: dev-intern,IAM - User MFA,IAM user 'dev-intern' has console access but no MFA enabled,HIGH,FAIL,Enable MFA for user 'dev-intern'. Consider enforcing MFA via IAM policy.,2026-05-04 18:14:58 UTC
+IAM User: legacy-deploy,IAM - User MFA,IAM user 'legacy-deploy' has console access but no MFA enabled,HIGH,FAIL,Enable MFA for user 'legacy-deploy'. Consider enforcing MFA via IAM policy.,2026-05-04 18:14:58 UTC
+Access Key: AKIAIOSFODNN7EXAMPLE (User: dev-ops),IAM - Key Rotation,Access key 'AKIAIOSFODNN7EXAMPLE' for user 'dev-ops' is 142 days old (exceeds 90-day limit),HIGH,FAIL,"Rotate access key for user 'dev-ops'. Create new key, update apps, deactivate old key.",2026-05-04 18:14:58 UTC
+IAM User: admin-user,IAM - Least Privilege,User 'admin-user' has AdministratorAccess policy directly attached,HIGH,FAIL,Remove direct AdministratorAccess from 'admin-user'. Use groups with specific permissions.,2026-05-04 18:14:58 UTC
+Root Account,IAM - Root Usage,Root account was used 5 days ago (within last 30 days),HIGH,FAIL,Avoid using root account. Create IAM users with appropriate permissions.,2026-05-04 18:14:58 UTC
+IAM Access Keys,IAM - Key Rotation,Checked 12 users - rotation policy partially compliant,MEDIUM,PASS,Continue monitoring key ages,2026-05-04 18:14:58 UTC
+S3: company-public-assets,S3 - Public Access,"Bucket 'company-public-assets' has public access block disabled: BlockPublicAcls, IgnorePublicAcls",CRITICAL,FAIL,Enable all public access blocks for bucket 'company-public-assets'.,2026-05-04 18:14:58 UTC
+S3: dev-logs-bucket,S3 - Encryption,Bucket 'dev-logs-bucket' does not have default encryption enabled,HIGH,FAIL,Enable default encryption (AES-256 or KMS) on bucket 'dev-logs-bucket'.,2026-05-04 18:14:58 UTC
+S3: production-data,S3 - Public Access,Bucket 'production-data' has all public access blocks enabled,CRITICAL,PASS,No action needed,2026-05-04 18:14:58 UTC
+S3: production-data,S3 - Encryption,Bucket 'production-data' has default encryption enabled (aws:kms),HIGH,PASS,No action needed - encryption is enabled,2026-05-04 18:14:58 UTC
+S3: backups-2024,S3 - Versioning,Bucket 'backups-2024' does not have versioning enabled,MEDIUM,FAIL,Enable versioning on bucket 'backups-2024' to protect against accidental deletion.,2026-05-04 18:14:58 UTC
+S3: production-data,S3 - Versioning,Bucket 'production-data' has versioning enabled,MEDIUM,PASS,No action needed,2026-05-04 18:14:58 UTC
+SG: sg-0a1b2c3d4e (web-servers-sg),EC2 - Security Groups,Security group 'web-servers-sg' (sg-0a1b2c3d4e) allows SSH (port 22) from 0.0.0.0/0,HIGH,FAIL,Restrict port 22 (SSH) to specific IP ranges. Never expose SSH access to the internet.,2026-05-04 18:14:58 UTC
+SG: sg-9f8e7d6c5b (windows-rdp-sg),EC2 - Security Groups,Security group 'windows-rdp-sg' (sg-9f8e7d6c5b) allows RDP (port 3389) from 0.0.0.0/0,HIGH,FAIL,Restrict port 3389 (RDP) to specific IP ranges. Use a VPN or bastion host instead.,2026-05-04 18:14:58 UTC
+SG: sg-1122334455 (db-access-sg),EC2 - Security Groups,Security group 'db-access-sg' (sg-1122334455) allows MySQL (port 3306) from 0.0.0.0/0,CRITICAL,FAIL,Restrict port 3306 (MySQL) to specific IP ranges. Never expose MySQL database to the internet.,2026-05-04 18:14:58 UTC
+CloudTrail: management-trail,CloudTrail - Logging,CloudTrail trail 'management-trail' is active and logging,CRITICAL,PASS,No action needed - logging is active,2026-05-04 18:14:58 UTC
+CloudTrail: management-trail,CloudTrail - Multi-Region,Trail 'management-trail' has multi-region logging enabled,HIGH,PASS,No action needed,2026-05-04 18:14:58 UTC
+CloudTrail: management-trail,CloudTrail - Log Validation,Trail 'management-trail' does NOT have log file validation enabled,MEDIUM,FAIL,Enable log file validation to detect tampering with CloudTrail logs.,2026-05-04 18:14:58 UTC
