@@ -31,7 +31,7 @@ CloudForge-Auditor is a Python-based security auditing tool that connects to an 
 
 ```bash
 # Clone the repository
-git clone <repo-url>
+git clone https://github.com/SonOfTroll/CloudForge-Auditor.git
 cd CloudForge-Auditor
 
 # Install dependencies
