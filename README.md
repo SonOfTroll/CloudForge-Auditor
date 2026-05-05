@@ -1,14 +1,14 @@
-# ☁️ CloudForge-Auditor
+# CloudForge-Auditor
 
 **Automated AWS Cloud Security & Compliance Auditor**
 
 CloudForge-Auditor is a Python-based security auditing tool that connects to an AWS environment using read-only access, audits configurations across core services, compares them against CIS Benchmark best practices, and generates professional audit reports.
 
-> ⚠️ **Disclaimer:** This tool is for security auditing and compliance learning purposes only. It performs **read-only** checks and does not modify any AWS resources.
+> **Disclaimer:** This tool is for security auditing and compliance learning purposes only. It performs **read-only** checks and does not modify any AWS resources.
 
 ---
 
-## 📋 Services Covered
+## Services Covered
 
 | Service | Checks Performed |
 |---------|-----------------|
@@ -19,7 +19,7 @@ CloudForge-Auditor is a Python-based security auditing tool that connects to an 
 
 ---
 
-## 🚀 How to Run
+## How to Run
 
 ### Prerequisites
 
@@ -87,7 +87,7 @@ Or at minimum, these permissions:
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 CloudForge-Auditor/
@@ -107,7 +107,7 @@ CloudForge-Auditor/
 
 ---
 
-## 📊 Sample Findings
+## Sample Findings
 
 The tool generates findings in the following format:
 
@@ -127,7 +127,7 @@ The tool generates findings in the following format:
 
 ---
 
-## 🔧 Remediation Guide
+## Remediation Guide
 
 ### 1. MFA Enforcement
 - Enable MFA on the root account using a hardware token (YubiKey recommended)
@@ -166,7 +166,7 @@ The tool generates findings in the following format:
 
 ---
 
-## ⚠️ Limitations
+## Limitations
 
 - **Read-only auditing** — This tool does not make any changes to your AWS environment
 - **Point-in-time assessment** — Results reflect the state at the time of the scan
@@ -177,7 +177,7 @@ The tool generates findings in the following format:
 
 ---
 
-## 📝 License
+## License
 
 This project is for educational and compliance assessment purposes only.
 
