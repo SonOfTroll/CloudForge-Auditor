@@ -177,8 +177,3 @@ The tool generates findings in the following format:
 
 ---
 
-## License
-
-This project is for educational and compliance assessment purposes only.
-
----
