@@ -10,13 +10,13 @@ Covers:
 Why S3 auditing matters:
 S3 buckets are one of the most common sources of data breaches in AWS.
 Misconfigured buckets have exposed sensitive data countless times.
-Public buckets, no encryption, no versioning = recipe for disaster.
+Public buckets without encryption or versioning are a high-risk pattern.
 """
 
 from utils import (
     get_aws_client, create_finding,
     SEVERITY_CRITICAL, SEVERITY_HIGH, SEVERITY_MEDIUM, SEVERITY_LOW,
-    STATUS_PASS, STATUS_FAIL
+    STATUS_PASS
 )
 
 
@@ -34,7 +34,7 @@ def run_s3_audit():
         ))
         return findings
     
-    # first get all buckets
+    # Start with the account-level bucket list, then check each bucket in turn.
     try:
         response = s3_client.list_buckets()
         bucketList = response.get('Buckets', [])
@@ -55,21 +55,18 @@ def run_s3_audit():
             bucketName = bucket['Name']
             print(f"    Scanning bucket: {bucketName}...")
             
-            # check public access block
             try:
                 pubAccess = check_public_access(s3_client, bucketName)
                 findings.extend(pubAccess)
             except Exception as e:
                 print(f"    [WARN] Public access check failed for {bucketName}: {e}")
             
-            # check encryption
             try:
                 encFindings = check_encryption(s3_client, bucketName)
                 findings.extend(encFindings)
             except Exception as e:
                 print(f"    [WARN] Encryption check failed for {bucketName}: {e}")
             
-            # check versioning
             try:
                 verFindings = check_versioning(s3_client, bucketName)
                 findings.extend(verFindings)
@@ -104,7 +101,7 @@ def check_public_access(s3_client, bucketName):
         pubBlock = s3_client.get_public_access_block(Bucket=bucketName)
         config = pubBlock['PublicAccessBlockConfiguration']
         
-        # check all four settings - they should all be True
+        # AWS exposes four public access block switches; full protection needs all of them.
         blockPublicAcls = config.get('BlockPublicAcls', False)
         ignorePublicAcls = config.get('IgnorePublicAcls', False)
         blockPublicPolicy = config.get('BlockPublicPolicy', False)

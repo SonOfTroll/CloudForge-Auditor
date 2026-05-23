@@ -4,7 +4,7 @@ Checks IAM configurations against CIS Benchmark best practices.
 
 Covers:
 - Root account MFA status
-- User MFA enforcement  
+- User MFA enforcement
 - Access key rotation (90-day policy)
 - Overprivileged users (AdministratorAccess)
 - Root account recent usage
@@ -17,9 +17,9 @@ unauthorized access, privilege escalation, and full account compromise.
 from utils import (
     get_aws_client, create_finding, days_since,
     SEVERITY_CRITICAL, SEVERITY_HIGH, SEVERITY_MEDIUM, SEVERITY_LOW,
-    STATUS_PASS, STATUS_FAIL
+    STATUS_PASS
 )
-from datetime import datetime, timezone
+from datetime import datetime
 import time
 import csv
 from io import StringIO
@@ -39,7 +39,7 @@ def run_iam_audit():
         ))
         return findings
     
-    # Run each check - if one fails others still run
+    # Keep the audit moving even if one IAM check fails.
     checks = [
         ("Root MFA", check_root_mfa),
         ("User MFA", check_users_mfa),
@@ -114,7 +114,7 @@ def check_users_mfa(iam_client):
     print("    Checking user MFA status...")
     
     try:
-        # get all users - using paginator for large accounts
+        # Use pagination so larger accounts are handled cleanly.
         userList = []
         paginator = iam_client.get_paginator('list_users')
         for page in paginator.paginate():
@@ -138,7 +138,7 @@ def check_users_mfa(iam_client):
                     except iam_client.exceptions.NoSuchEntityException:
                         pass  # API-only user, MFA less critical
                     except Exception:
-                        # not the cleanest way but works
+                        # If the profile lookup fails unexpectedly, treat it as audit-relevant.
                         usersWithoutMfa.append(userName)
             except Exception as e:
                 print(f"    [WARN] Could not check MFA for {userName}: {e}")

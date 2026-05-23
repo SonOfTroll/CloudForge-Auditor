@@ -258,7 +258,7 @@
         <!-- Summary Cards -->
         <div class="summary-grid">
             <div class="summary-card">
-                <div class="count count-total">19</div>
+                <div class="count count-total">20</div>
                 <div class="label">Total Findings</div>
             </div>
             <div class="summary-card">
@@ -274,11 +274,11 @@
                 <div class="label">Medium</div>
             </div>
             <div class="summary-card">
-                <div class="count count-low">0</div>
+                <div class="count count-low">1</div>
                 <div class="label">Low</div>
             </div>
             <div class="summary-card">
-                <div class="count count-pass">6</div>
+                <div class="count count-pass">7</div>
                 <div class="label">Passed</div>
             </div>
             <div class="summary-card">
@@ -287,6 +287,40 @@
             </div>
         </div>
         
+        <div class="findings-section">
+            <h2>Security Group Visual Map</h2>
+            <table class="findings-table">
+                <thead>
+                    <tr>
+                        <th>Source</th>
+                        <th>Target</th>
+                        <th>Port</th>
+                        <th>Context</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Internet</td>
+                        <td>web-servers-sg</td>
+                        <td>SSH / 22</td>
+                        <td>Public subnet resource with a public IP</td>
+                    </tr>
+                    <tr>
+                        <td>Internet</td>
+                        <td>db-access-sg</td>
+                        <td>MySQL / 3306</td>
+                        <td>Private subnet attachment still has an overly broad source</td>
+                    </tr>
+                    <tr>
+                        <td>app-private-sg</td>
+                        <td>db-access-sg</td>
+                        <td>tcp / 3306</td>
+                        <td>Preferred service-to-service security group reference</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
         <!-- Failed Findings -->
         <div class="findings-section">
             <h2>❌ Failed Checks — Requires Attention</h2>

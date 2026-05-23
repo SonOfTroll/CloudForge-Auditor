@@ -9,14 +9,13 @@ Covers:
 Why CloudTrail auditing matters:
 CloudTrail is the audit log for AWS. Without it, you have no visibility
 into who did what in your account. If CloudTrail is off, an attacker
-can do whatever they want and you'll never know. It's like turning off
-security cameras in a bank.
+can make changes without leaving the evidence teams need for investigation.
 """
 
 from utils import (
-    get_aws_client, create_finding, get_all_regions,
-    SEVERITY_CRITICAL, SEVERITY_HIGH, SEVERITY_MEDIUM, SEVERITY_LOW,
-    STATUS_PASS, STATUS_FAIL
+    get_aws_client, create_finding,
+    SEVERITY_CRITICAL, SEVERITY_HIGH, SEVERITY_MEDIUM,
+    STATUS_PASS
 )
 
 
@@ -34,7 +33,7 @@ def run_cloudtrail_audit():
         ))
         return findings
     
-    # check if CloudTrail is enabled
+    # Logging status and regional coverage are separate checks.
     try:
         enabled_findings = check_cloudtrail_enabled(ct_client)
         findings.extend(enabled_findings)
@@ -46,7 +45,6 @@ def run_cloudtrail_audit():
             SEVERITY_HIGH, "Manually verify CloudTrail status"
         ))
     
-    # check multi-region logging
     try:
         region_findings = check_multiregion_logging(ct_client)
         findings.extend(region_findings)
@@ -76,7 +74,6 @@ def check_cloudtrail_enabled(ct_client):
         trailList = trails_response.get('trailList', [])
         
         if len(trailList) == 0:
-            # no trails at all - really bad
             findings.append(create_finding(
                 "CloudTrail", "CloudTrail - Logging",
                 "No CloudTrail trails configured in this account",
@@ -95,7 +92,6 @@ def check_cloudtrail_enabled(ct_client):
             trailName = trail.get('Name', 'unnamed')
             trailArn = trail.get('TrailARN', 'N/A')
             
-            # get the logging status
             try:
                 status = ct_client.get_trail_status(Name=trailArn)
                 isLogging = status.get('IsLogging', False)
