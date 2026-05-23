@@ -95,7 +95,7 @@ You can also run `python main.py --demo` which skips the AWS connection entirely
 
 ### 4. `ec2_audit.py` — EC2 / Security Group Checks
 
-**What it does:** Audits security groups (AWS firewalls) for dangerous rules that expose services to the entire internet.
+**What it does:** Audits security groups (AWS firewalls) for dangerous rules and adds VPC context so findings explain whether a risky rule is attached to public-facing or private-only resources.
 
 **What it looks for:**
 
@@ -110,11 +110,20 @@ You can also run `python main.py --demo` which skips the AWS connection entirely
 
 It also flags security groups that allow **ALL traffic** from `0.0.0.0/0` (the entire internet).
 
+It now also checks:
+- Security groups attached to public subnet resources with public IPs
+- Security groups attached only to private resources
+- Broad VPC CIDR rules where a source security group would be safer
+- Unused security groups
+- Security group to security group inbound relationships for the HTML visual map
+
 **How it works technically:**
-- Calls `describe_security_groups()` with pagination
+- Calls `describe_security_groups()`, `describe_network_interfaces()`, `describe_subnets()`, `describe_route_tables()`, and `describe_vpcs()` with pagination
 - For each security group, iterates through inbound rules (`IpPermissions`)
 - Checks if any rule's CIDR range is `0.0.0.0/0` (IPv4) or `::/0` (IPv6) — both mean "open to the world"
 - Cross-references the port range against the list of dangerous ports
+- Uses subnet route tables and ENI public IP associations to estimate whether the affected resource is internet reachable
+- Adds security group map metadata to the findings so `report_generator.py` can render a visual path map
 
 ---
 
@@ -154,6 +163,7 @@ It also flags security groups that allow **ALL traffic** from `0.0.0.0/0` (the e
   - Summary cards showing total counts by severity (CRITICAL, HIGH, MEDIUM, LOW) and status (PASS, FAIL)
   - "Failed Checks" table sorted by severity (most critical first)
   - "Passed Checks" table showing what's configured correctly
+  - Security group visual map showing Internet-to-SG and SG-to-SG inbound paths
   - Color-coded severity badges
   - Hover effects on cards and table rows
   - Responsive design (works on mobile)

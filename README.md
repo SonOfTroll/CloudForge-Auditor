@@ -14,7 +14,7 @@ CloudForge-Auditor is a Python-based security auditing tool that connects to an 
 |---------|-----------------|
 | **IAM** | Root MFA, User MFA, Access Key Rotation (90-day), AdministratorAccess detection, Root usage |
 | **S3** | Public Access Block, Default Encryption, Versioning |
-| **EC2** | Security Groups: SSH (22), RDP (3389), Database ports (3306, 5432, 1433) open to 0.0.0.0/0 |
+| **EC2 / VPC** | Context-aware security group exposure, public/private subnet attachment checks, SSH/RDP/database ports, broad VPC CIDRs, unused security groups, security group relationship map |
 | **CloudTrail** | Trail enabled, Logging active, Multi-region logging, Log file validation |
 
 ---
@@ -80,6 +80,10 @@ Or at minimum, these permissions:
 - `s3:GetBucketEncryption`
 - `s3:GetBucketVersioning`
 - `ec2:DescribeSecurityGroups`
+- `ec2:DescribeNetworkInterfaces`
+- `ec2:DescribeSubnets`
+- `ec2:DescribeRouteTables`
+- `ec2:DescribeVpcs`
 - `ec2:DescribeRegions`
 - `cloudtrail:DescribeTrails`
 - `cloudtrail:GetTrailStatus`
@@ -115,7 +119,7 @@ The tool generates findings in the following format:
 |---|---|---|---|---|
 | Root Account | IAM - Root MFA | Root account does NOT have MFA enabled | CRITICAL | Enable MFA on root account immediately |
 | S3: my-bucket | S3 - Public Access | Bucket has public access block disabled | CRITICAL | Enable Block Public Access |
-| SG: sg-12345 | EC2 - Security Groups | SSH (port 22) open to 0.0.0.0/0 | HIGH | Restrict to specific IP ranges |
+| SG: sg-12345 | EC2 - Security Groups | SSH (port 22) open to internet; attached to public subnet resources | HIGH | Restrict to VPN/corporate IP/bastion or a source security group |
 | CloudTrail | CloudTrail - Logging | No CloudTrail trails configured | CRITICAL | Create a CloudTrail trail immediately |
 
 ### Severity Levels
@@ -157,6 +161,8 @@ The tool generates findings in the following format:
 - Use AWS Systems Manager Session Manager instead of direct SSH
 - Place databases in private subnets with no public access
 - Use Security Group references instead of CIDR blocks where possible
+- Replace broad VPC CIDR rules with source security groups for app-to-db and app-to-cache access
+- Review the HTML security group map for paths from Internet to workloads and service-to-service access
 
 ### 6. Logging & Monitoring
 - Enable CloudTrail in all regions (multi-region trail)
@@ -172,8 +178,8 @@ The tool generates findings in the following format:
 - **Point-in-time assessment** — Results reflect the state at the time of the scan
 - **Not real-time monitoring** — For continuous monitoring, use AWS Config Rules or AWS Security Hub
 - **Single account** — Currently audits one AWS account at a time (no multi-account/Organization support)
-- **Default region** — Some checks use the default region from AWS CLI configuration
+- **Default region** — EC2/VPC checks run in the default AWS CLI region
+- **Reachability approximation** — VPC-aware checks use route tables, subnet placement, public IPs, and ENIs; they do not replace AWS Reachability Analyzer
 - **API rate limits** — Large environments with many resources may hit AWS API throttling
 
 ---
-
