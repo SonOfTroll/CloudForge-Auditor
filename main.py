@@ -183,6 +183,54 @@ def run_demo_mode():
             SEVERITY_CRITICAL,
             "Restrict port 3306 (MySQL) to specific IP ranges. Never expose MySQL database to the internet."
         ),
+        create_finding(
+            "EC2 Security Group Map", "EC2 - Network Map",
+            "Mapped 3 security groups and 3 inbound relationships",
+            SEVERITY_LOW,
+            "Use the HTML report map to review public paths and security group to security group access.",
+            status=STATUS_PASS,
+            metadata={
+                "network_map": {
+                    "nodes": [
+                        {
+                            "id": "sg-0a1b2c3d4e",
+                            "name": "web-servers-sg",
+                            "vpc": "vpc-demo",
+                            "used": True,
+                            "publicly_reachable": True,
+                            "resources": [
+                                {"name": "EC2 i-webdemo", "subnet": "subnet-public-a", "publicly_reachable": True}
+                            ],
+                        },
+                        {
+                            "id": "sg-1122334455",
+                            "name": "db-access-sg",
+                            "vpc": "vpc-demo",
+                            "used": True,
+                            "publicly_reachable": False,
+                            "resources": [
+                                {"name": "RDS-like database interface", "subnet": "subnet-private-a", "publicly_reachable": False}
+                            ],
+                        },
+                        {
+                            "id": "sg-app-private",
+                            "name": "app-private-sg",
+                            "vpc": "vpc-demo",
+                            "used": True,
+                            "publicly_reachable": False,
+                            "resources": [
+                                {"name": "EC2 i-appdemo", "subnet": "subnet-private-a", "publicly_reachable": False}
+                            ],
+                        },
+                    ],
+                    "edges": [
+                        {"source": "Internet", "target": "sg-0a1b2c3d4e", "port": "22", "protocol": "SSH", "risk": "HIGH", "exposure": "attached to public subnet resources with public IPs"},
+                        {"source": "Internet", "target": "sg-1122334455", "port": "3306", "protocol": "MySQL", "risk": "CRITICAL", "exposure": "attached only to private subnet resources"},
+                        {"source": "sg-app-private", "target": "sg-1122334455", "port": "3306", "protocol": "tcp", "risk": "reference"},
+                    ],
+                }
+            }
+        ),
         
         # CloudTrail findings
         create_finding(

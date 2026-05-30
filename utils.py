@@ -3,7 +3,6 @@ utils.py - Utility functions for CloudForge-Auditor
 Helper stuff used across different audit modules
 """
 
-import boto3
 from datetime import datetime, timezone
 import sys
 
@@ -28,6 +27,7 @@ def get_aws_client(service_name, region=None):
     # not the cleanest way but works for our use case
     """
     try:
+        import boto3
         if region:
             client = boto3.client(service_name, region_name=region)
         else:
@@ -41,6 +41,7 @@ def get_aws_client(service_name, region=None):
 def get_aws_resource(service_name, region=None):
     """Get a boto3 resource - sometimes easier to work with than client"""
     try:
+        import boto3
         if region:
             resource = boto3.resource(service_name, region_name=region)
         else:
@@ -54,6 +55,7 @@ def get_aws_resource(service_name, region=None):
 def get_account_id():
     """Get the current AWS account ID - needed for some checks"""
     try:
+        import boto3
         sts = boto3.client('sts')
         identity = sts.get_caller_identity()
         return identity['Account']
@@ -82,7 +84,7 @@ def days_since(date_obj):
     return delta.days
 
 
-def create_finding(resource_id, risk_area, finding, severity, recommendation, status="FAIL"):
+def create_finding(resource_id, risk_area, finding, severity, recommendation, status="FAIL", metadata=None):
     """
     Create a standardized finding dictionary.
     Every audit check should return findings in this format.
@@ -98,6 +100,8 @@ def create_finding(resource_id, risk_area, finding, severity, recommendation, st
         "status": status,
         "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
     }
+    if metadata:
+        finding_dict["metadata"] = metadata
     return finding_dict
 
 
@@ -124,6 +128,7 @@ def get_all_regions():
     # this might fail if AWS adds/removes regions but should be fine for now
     """
     try:
+        import boto3
         ec2 = boto3.client('ec2')
         regions_response = ec2.describe_regions()
         region_list = []

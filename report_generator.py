@@ -242,6 +242,95 @@ def _generate_html(findings, filepath):
         .findings-table tr:hover {{
             background: #16213e;
         }}
+
+        /* Security group map */
+        .network-map {{
+            background: #1a1a2e;
+            border: 1px solid #2a2a4a;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 30px;
+        }}
+
+        .network-map h2 {{
+            font-size: 1.3em;
+            color: #ccd6f6;
+            margin-bottom: 16px;
+        }}
+
+        .map-layout {{
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }}
+
+        .map-panel {{
+            background: #111827;
+            border: 1px solid #2a2a4a;
+            border-radius: 10px;
+            padding: 16px;
+        }}
+
+        .map-panel h3 {{
+            color: #8892b0;
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }}
+
+        .sg-node {{
+            border: 1px solid #2a2a4a;
+            border-left: 4px solid #64ffda;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            background: #16213e;
+        }}
+
+        .sg-node.public {{
+            border-left-color: #ff6b6b;
+        }}
+
+        .sg-node.unused {{
+            border-left-color: #8892b0;
+            opacity: 0.85;
+        }}
+
+        .sg-title {{
+            color: #e0e0e0;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }}
+
+        .sg-meta, .sg-resource {{
+            color: #8892b0;
+            font-size: 0.82em;
+        }}
+
+        .map-edge {{
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 10px;
+            align-items: center;
+            border: 1px solid #2a2a4a;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+            background: #16213e;
+            font-size: 0.86em;
+        }}
+
+        .edge-arrow {{
+            color: #64ffda;
+            font-weight: 700;
+        }}
+
+        .edge-label {{
+            grid-column: 1 / 4;
+            color: #8892b0;
+            font-size: 0.82em;
+        }}
         
         /* Severity badges */
         .badge {{
@@ -324,6 +413,15 @@ def _generate_html(findings, filepath):
             .summary-grid {{
                 grid-template-columns: repeat(2, 1fr);
             }}
+            .map-layout {{
+                grid-template-columns: 1fr;
+            }}
+            .map-edge {{
+                grid-template-columns: 1fr;
+            }}
+            .edge-label {{
+                grid-column: auto;
+            }}
             .findings-table {{
                 font-size: 0.8em;
             }}
@@ -378,6 +476,8 @@ def _generate_html(findings, filepath):
             </div>
         </div>
         
+        {_generate_network_map_html(findings)}
+
         <!-- Failed Findings -->
         <div class="findings-section">
             <h2>❌ Failed Checks — Requires Attention</h2>
@@ -495,6 +595,83 @@ def _get_summary_stats(findings):
             stats['fail'] += 1
     
     return stats
+
+
+def _generate_network_map_html(findings):
+    """Render security group map metadata from EC2 findings, if available."""
+    network_map = None
+    for finding in findings:
+        metadata = finding.get('metadata', {})
+        if metadata.get('network_map'):
+            network_map = metadata['network_map']
+            break
+
+    if not network_map:
+        return ''
+
+    nodes = network_map.get('nodes', [])
+    edges = network_map.get('edges', [])
+
+    html = """        <div class="network-map">
+            <h2>Security Group Visual Map</h2>
+            <div class="map-layout">
+                <div class="map-panel">
+                    <h3>Security Groups & Attached Services</h3>
+"""
+
+    if not nodes:
+        html += """                    <div class="sg-meta">No security group nodes available.</div>
+"""
+    else:
+        for node in nodes[:40]:
+            classes = ["sg-node"]
+            if node.get('publicly_reachable'):
+                classes.append("public")
+            if not node.get('used'):
+                classes.append("unused")
+            html += f"""                    <div class="{' '.join(classes)}">
+                        <div class="sg-title">{_escape_html(node.get('name', 'unnamed'))} <span class="sg-meta">({_escape_html(node.get('id', ''))})</span></div>
+                        <div class="sg-meta">VPC: {_escape_html(node.get('vpc', 'N/A'))}</div>
+"""
+            resources = node.get('resources', [])
+            if resources:
+                for resource in resources:
+                    public_note = "public path" if resource.get('publicly_reachable') else "private path"
+                    html += f"""                        <div class="sg-resource">- {_escape_html(resource.get('name', 'unknown'))} | {_escape_html(resource.get('subnet', 'N/A'))} | {public_note}</div>
+"""
+            else:
+                html += """                        <div class="sg-resource">- unused or no attached network interface detected</div>
+"""
+            html += """                    </div>
+"""
+
+    html += """                </div>
+                <div class="map-panel">
+                    <h3>Inbound Relationships</h3>
+"""
+
+    if not edges:
+        html += """                    <div class="sg-meta">No inbound relationships detected.</div>
+"""
+    else:
+        for edge in edges[:60]:
+            risk = edge.get('risk', 'reference')
+            badge_class = f"badge-{str(risk).lower()}" if risk in ('CRITICAL', 'HIGH', 'MEDIUM', 'LOW') else "badge-pass"
+            label = f"{edge.get('protocol', 'unknown')} / {edge.get('port', 'all')}"
+            exposure = edge.get('exposure', 'security group reference')
+            html += f"""                    <div class="map-edge">
+                        <div>{_escape_html(edge.get('source', 'unknown'))}</div>
+                        <div class="edge-arrow">--></div>
+                        <div>{_escape_html(edge.get('target', 'unknown'))}</div>
+                        <div class="edge-label">{_escape_html(label)} <span class="badge {badge_class}">{_escape_html(risk)}</span> {_escape_html(exposure)}</div>
+                    </div>
+"""
+
+    html += """                </div>
+            </div>
+        </div>
+"""
+    return html
 
 
 def _escape_html(text):
