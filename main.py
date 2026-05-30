@@ -37,11 +37,11 @@ def print_banner():
     banner = """
     ╔═══════════════════════════════════════════════════════════╗
     ║                                                           ║
-    ║        ☁️  CloudForge-Auditor v1.0.0                      ║
-    ║        AWS Cloud Security & Compliance Auditor             ║
+    ║              CloudForge-Auditor v1.0.0                    ║
+    ║        AWS Cloud Security & Compliance Auditor            ║
     ║                                                           ║
     ║        Automated CIS Benchmark Assessment                 ║
-    ║        IAM | S3 | EC2 | CloudTrail                        ║
+    ║           IAM | S3 | EC2 | CloudTrail                     ║
     ║                                                           ║
     ╚═══════════════════════════════════════════════════════════╝
     """
