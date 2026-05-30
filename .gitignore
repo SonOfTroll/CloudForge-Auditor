@@ -26,3 +26,6 @@ Thumbs.db
 # Generated reports (keep sample ones)
 sample_output/audit_report_*.csv
 sample_output/audit_report_*.html
+
+# personal notes
+PROJECT_EXPLANATION.md
